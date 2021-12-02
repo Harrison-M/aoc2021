@@ -14,6 +14,28 @@ struct Instruction {
     value: usize,
 }
 
+fn parse_instructions(instruction_text: &str) -> Result<Vec<Instruction>, regex::Error> {
+    let instruction_re = Regex::new(INSTRUCTION_RE_STR)?;
+
+    Ok(instruction_text
+        .lines()
+        .map(|line| {
+            let caps = instruction_re.captures(line).expect("Invalid instruction");
+            let command = match caps.get(1).map(|c| c.as_str()) {
+                Some("forward") => Command::Forward,
+                Some("down") => Command::Down,
+                Some("up") => Command::Up,
+                _ => panic!("Invalid instruction"),
+            };
+            let value = caps
+                .get(2)
+                .map(|val| val.as_str().parse().expect("Invalid value"))
+                .expect("Missing value");
+            Instruction { command, value }
+        })
+        .collect())
+}
+
 fn part1(instructions: &Vec<Instruction>) -> (usize, usize) {
     instructions
         .iter()
@@ -42,25 +64,7 @@ fn main() -> Result<(), regex::Error> {
 
     let contents = fs::read_to_string(filename).expect("Error opening file");
 
-    let instruction_re = Regex::new(INSTRUCTION_RE_STR)?;
-
-    let instructions: Vec<Instruction> = contents
-        .lines()
-        .map(|line| {
-            let caps = instruction_re.captures(line).expect("Invalid instruction");
-            let command = match caps.get(1).map(|c| c.as_str()) {
-                Some("forward") => Command::Forward,
-                Some("down") => Command::Down,
-                Some("up") => Command::Up,
-                _ => panic!("Invalid instruction"),
-            };
-            let value = caps
-                .get(2)
-                .map(|val| val.as_str().parse().expect("Invalid value"))
-                .expect("Missing value");
-            Instruction { command, value }
-        })
-        .collect();
+    let instructions = parse_instructions(&contents)?;
 
     let (x, y) = part1(&instructions);
     println!("Part 1: {}", x * y);
