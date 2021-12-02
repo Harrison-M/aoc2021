@@ -76,4 +76,24 @@ fn main() -> Result<(), regex::Error> {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    const SAMPLE: &str = include_str!("sample");
+
+    #[test]
+    fn part1_example() {
+        let instructions = parse_instructions(SAMPLE).expect("Failed to parse regex");
+
+        assert_eq!(part1(&instructions), (15, 10));
+    }
+
+    #[test]
+    fn part2_example() {
+        let instructions = parse_instructions(SAMPLE).expect("Failed to parse regex");
+
+        let (x, y, _) = part2(&instructions);
+
+        assert_eq!((x, y), (15, 60));
+    }
+}
