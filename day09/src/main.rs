@@ -39,6 +39,47 @@ fn part1(grid: &[Vec<u32>]) -> u32 {
     risk
 }
 
+fn walk_basin(x: usize, y: usize, grid: &mut [Vec<u32>]) -> usize {
+    if grid[y][x] == 9 {
+        return 0;
+    }
+    grid[y][x] = 9;
+    let mut count = 1;
+    if x != 0 {
+        count += walk_basin(x - 1, y, grid);
+    }
+    if y != 0 {
+        count += walk_basin(x, y - 1, grid);
+    }
+    if grid[y].get(x + 1).is_some() {
+        count += walk_basin(x + 1, y, grid);
+    }
+    if grid.get(y + 1).is_some() {
+        count += walk_basin(x, y + 1, grid);
+    }
+    count
+}
+
+fn part2(input: &[Vec<u32>]) -> usize {
+    let mut grid: Vec<Vec<u32>> = input.into();
+    let mut basin_sizes = Vec::new();
+
+    for y in 0..grid.len() {
+        for x in 0..grid[0].len() {
+            if grid[y][x] != 9 {
+                basin_sizes.push(walk_basin(x, y, &mut grid))
+            }
+        }
+    }
+    basin_sizes.sort_unstable();
+    basin_sizes
+        .into_iter()
+        .rev()
+        .take(3)
+        .reduce(|acc, basin| acc * basin)
+        .unwrap()
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
@@ -48,4 +89,22 @@ fn main() {
     let grid = parse_input(&contents);
 
     println!("Part 1: {}", part1(&grid));
+    println!("Part 2: {}", part2(&grid));
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const SAMPLE: &str = include_str!("sample");
+
+    #[test]
+    fn part1_example() {
+        assert_eq!(part1(&parse_input(SAMPLE)), 15);
+    }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(part2(&parse_input(SAMPLE)), 1134);
+    }
 }
