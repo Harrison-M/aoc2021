@@ -3,7 +3,7 @@ use std::{
     env, fs,
 };
 
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum Cave<'a> {
     Big(&'a str),
     Small(&'a str),
@@ -51,72 +51,84 @@ fn parse_input(input: &str) -> Network {
     network
 }
 
-fn count_routes<'a>(cave: Cave<'a>, network: &'a Network, visited: &HashSet<&'a str>) -> usize {
+fn count_routes<'a>(cave: Cave<'a>, network: &'a Network, visited: &mut HashSet<&'a str>) -> usize {
     if cave == End {
         return 1;
     }
-    let mut next_visited = visited.clone();
+
     if let Small(name) = cave {
-        next_visited.insert(name);
+        visited.insert(name);
     }
-    network
-        .get(&cave)
-        .unwrap()
-        .iter()
-        .filter(|link| match link {
-            Small(name) => !visited.contains(name),
-            _ => true,
-        })
-        .map(|next| count_routes(*next, network, &next_visited))
-        .sum()
+
+    let mut result = 0;
+    for link in network.get(&cave).unwrap().iter() {
+        match link {
+            Small(name) if visited.contains(name) => continue,
+            _ => (),
+        }
+
+        result += count_routes(*link, network, visited);
+    }
+
+    if let Small(name) = cave {
+        visited.remove(name);
+    }
+
+    result
 }
 
 fn part1(network: &Network) -> usize {
-    count_routes(Start, network, &HashSet::new())
+    count_routes(Start, network, &mut HashSet::new())
 }
 
 fn count_part2_routes<'a>(
     cave: Cave<'a>,
     network: &'a Network,
-    visited: &HashSet<&'a str>,
+    visited: &mut HashSet<&'a str>,
     visited_small_twice: bool,
 ) -> usize {
     if cave == End {
         return 1;
     }
-    let mut next_visited = visited.clone();
-    if let Small(name) = cave {
-        next_visited.insert(name);
-    }
+
+    println!("{:?}", visited);
+
+    let mut result = 0;
     if visited_small_twice {
-        network
-            .get(&cave)
-            .unwrap()
-            .iter()
-            .filter(|link| match link {
-                Small(name) => !visited.contains(name),
-                _ => true,
-            })
-            .map(|next| count_part2_routes(*next, network, &next_visited, true))
-            .sum()
+        for link in network.get(&cave).unwrap().iter() {
+            match link {
+                Small(name) if !visited.insert(name) => continue,
+                _ => (),
+            }
+
+            result += count_part2_routes(*link, network, visited, true);
+
+            if let Small(name) = link {
+                visited.remove(name);
+            }
+        }
     } else {
-        network
-            .get(&cave)
-            .unwrap()
-            .iter()
-            .map(|link| match link {
-                Small(name) if visited.contains(name) => (link, true),
-                _ => (link, false),
-            })
-            .map(|(next, second_visit)| {
-                count_part2_routes(*next, network, &next_visited, second_visit)
-            })
-            .sum()
+        for link in network.get(&cave).unwrap().iter() {
+            let second_visit = if let Small(name) = link {
+                !visited.insert(name)
+            } else {
+                false
+            };
+
+            result += count_part2_routes(*link, network, visited, second_visit);
+
+            match (link, second_visit) {
+                (Small(name), false) => visited.remove(name),
+                _ => false,
+            };
+        }
     }
+
+    result
 }
 
 fn part2(network: &Network) -> usize {
-    count_part2_routes(Start, network, &HashSet::new(), false)
+    count_part2_routes(Start, network, &mut HashSet::new(), false)
 }
 
 fn main() {
