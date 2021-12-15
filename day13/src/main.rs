@@ -133,3 +133,24 @@ fn main() -> Result<(), Error> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const SAMPLE: &str = include_str!("sample");
+    const PART2_OUTPUT: &str = include_str!("sample_result");
+
+    #[test]
+    fn part1_example() {
+        assert_eq!(part1(&parse_input(SAMPLE)), 17);
+    }
+
+    #[test]
+    fn part2_example() {
+        assert_eq!(
+            part2(parse_input(SAMPLE)).unwrap(),
+            PART2_OUTPUT.to_string()
+        );
+    }
+}
