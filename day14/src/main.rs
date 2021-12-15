@@ -124,3 +124,22 @@ fn main() {
     println!("Part 1: {}", part1(polymer, &rules));
     println!("Part 2: {}", part2(polymer, &rules));
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const SAMPLE: &str = include_str!("sample");
+
+    #[test]
+    fn part1_example() {
+        let (polymer, rules) = parse_input(SAMPLE);
+        assert_eq!(part1(polymer, &rules), 1588);
+    }
+
+    #[test]
+    fn part2_example() {
+        let (polymer, rules) = parse_input(SAMPLE);
+        assert_eq!(part2(polymer, &rules), 2188189693529);
+    }
+}
