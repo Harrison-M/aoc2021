@@ -1,4 +1,9 @@
-use std::{collections::HashSet, env, fs};
+use std::{
+    collections::HashSet,
+    env,
+    fmt::{Error, Write},
+    fs,
+};
 
 #[derive(Clone, Copy)]
 enum Fold {
@@ -88,7 +93,7 @@ fn part1(init: &Paper) -> usize {
     paper.dots.len()
 }
 
-fn part2(mut paper: Paper) {
+fn part2(mut paper: Paper) -> Result<String, Error> {
     loop {
         if !paper.fold() {
             break;
@@ -98,19 +103,23 @@ fn part2(mut paper: Paper) {
     let max_x = paper.dots.iter().map(|Dot(x, _)| x).max().unwrap();
     let max_y = paper.dots.iter().map(|Dot(_, y)| y).max().unwrap();
 
+    let mut output: String = String::new();
+
     for y in 0..=*max_y {
         for x in 0..=*max_x {
             if paper.dots.contains(&Dot(x, y)) {
-                print!("#");
+                output.write_char('#')?;
             } else {
-                print!(".");
+                output.write_char('.')?;
             }
         }
-        println!();
+        output.write_char('\n')?;
     }
+
+    Ok(output)
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
 
@@ -119,5 +128,8 @@ fn main() {
     let paper = parse_input(&contents);
 
     println!("Part 1: {}", part1(&paper));
-    part2(paper);
+    println!("Part 2:");
+    print!("{}", part2(paper)?);
+
+    Ok(())
 }
