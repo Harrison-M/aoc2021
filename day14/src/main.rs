@@ -113,26 +113,6 @@ fn part2(polymer: &str, rules: &HashMap<(char, char), char>) -> usize {
     max - min
 }
 
-/*
-fn part2(init: &str, rules: &HashMap<&str, &str>) -> usize {
-    let mut polymer = init.to_string();
-
-    for _ in 0..40 {
-        polymer = step(polymer, rules);
-    }
-
-    let mut counts: HashMap<char, usize> = HashMap::new();
-    for element in polymer.chars() {
-        counts.entry(element).and_modify(|c| *c += 1).or_insert(1);
-    }
-
-    let min = counts.values().min().unwrap();
-    let max = counts.values().max().unwrap();
-
-    max - min
-}
-*/
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     let filename = &args[1];
